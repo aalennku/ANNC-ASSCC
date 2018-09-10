@@ -1,0 +1,252 @@
+name: "pavia"
+layer {
+  name: "data"
+  type: "Data"
+  top: "data"
+  include { 
+    phase: TRAIN
+  }
+  data_param {
+    source: "../paviau_spect_lmdb"
+    batch_size: 512
+    backend: LMDB
+  }
+}
+layer {
+  name: "data"
+  type: "Data"
+  top: "data"
+  include {
+    phase: TEST
+  }
+  data_param {
+    source: "../paviau_spect_test_lmdb"
+    batch_size: 50
+    backend: LMDB
+  }
+}
+layer {
+  name: "data_label"
+  type: "Data"
+  top: "label"
+  include { 
+    phase: TRAIN
+  }
+  data_param {
+    source: "../paviau_label_lmdb"
+    batch_size: 512
+    backend: LMDB
+  }
+}
+layer {
+  name: "data_label"
+  type: "Data"
+  top: "label"
+  include {
+    phase: TEST
+  }
+  data_param {
+    source: "../paviau_label_test_lmdb"
+    batch_size: 50
+    backend: LMDB
+  }
+}
+
+layer {
+    name: "reshape_spectral"
+    type: "Reshape"
+    bottom: "data"
+    top: "data_r"
+    reshape_param {
+        shape {
+            dim: 0 
+            dim: 103
+            dim: 1
+            dim: 1
+        }
+    }
+}
+layer {
+    name: "reshape_label"
+    type: "Reshape"
+    bottom: "label"
+    top: "label_r"
+    reshape_param {
+        shape {
+            dim: -1
+        }
+    }
+}
+
+layer { 
+   name: "conv1"
+   type: "Convolution"
+   bottom: "data_r"
+   top: "conv1"
+   param {
+     lr_mult: 1
+   } 
+   param {
+     lr_mult: 2
+   }   
+   convolution_param {
+     num_output: 512
+     #num_output: 256
+     kernel_size: 1
+     stride: 1
+     weight_filler {
+       type: "gaussian"
+       std: 0.01
+     }
+     bias_filler {
+       type: "constant"
+       value: 0
+     } 
+   }
+ } 
+
+layer {
+    name: "relu1"
+    type: "ReLU"
+    bottom: "conv1"
+    top: "conv1p"
+}
+layer { 
+   name: "conv2"
+   type: "Convolution"
+   bottom: "conv1p"
+   top: "conv2"
+   param {
+     lr_mult: 1
+   } 
+   param {
+     lr_mult: 2
+   }   
+   convolution_param {
+     #num_output: 512
+     num_output: 256
+     kernel_size: 1
+     stride: 1
+     weight_filler {
+       type: "gaussian"
+       std: 0.01
+     }
+     bias_filler {
+       type: "constant"
+       value: 0
+     } 
+   }
+ } 
+
+layer {
+    name: "relu2"
+    type: "ReLU"
+    bottom: "conv2"
+    top: "conv2p"
+}
+layer { 
+   name: "conv3"
+   type: "Convolution"
+   bottom: "conv2p"
+   top: "conv3"
+   param {
+     lr_mult: 1
+   } 
+   param {
+     lr_mult: 2
+   }   
+   convolution_param {
+     num_output: 32
+     #num_output: 128 
+     kernel_size: 1
+     stride: 1
+     weight_filler {
+       type: "gaussian"
+       std: 0.01
+     }
+     bias_filler {
+       type: "constant"
+       value: 0
+     } 
+   }
+} 
+layer{
+    name: "drop_conv3"
+    type: "Dropout"
+    bottom: "conv3"
+    top: "conv3"
+    dropout_param {
+        dropout_ratio: 0.3
+    }
+}
+layer {
+    name: "center_loss"
+    type: "Python"
+    bottom: "conv3"
+    bottom: "label_r"
+    top: "center_loss"
+    python_param {
+        module: "center_loss"
+        layer: "CenterLossLayer"
+    }
+    include {
+        phase: TRAIN
+    }
+    loss_weight: 0.01 
+    #loss_weight: 0
+}
+layer { 
+   name: "conv4"
+   type: "Convolution"
+   bottom: "conv3"
+   top: "conv4"
+   param {
+     lr_mult: 1
+   } 
+   param {
+     lr_mult: 2
+   }   
+   convolution_param {
+     num_output: 9
+     kernel_size: 1
+     stride: 1
+     weight_filler {
+       type: "gaussian"
+       std: 0.01
+     }
+     bias_filler {
+       type: "constant"
+       value: 0
+     } 
+   }
+ } 
+
+layer {
+    name: "reshape_conv4"
+    type: "Reshape"
+    bottom: "conv4"
+    top: "conv4_r"
+    reshape_param {
+        shape {
+            dim: 0
+            dim: -1
+        }
+    }
+}
+layer {
+    name: "accuracy"
+    type: "Accuracy"
+    bottom: "conv4_r"
+    bottom: "label_r"
+    top: "accuracy"
+}
+layer {
+    name: "loss"
+    type: "SoftmaxWithLoss"
+    bottom: "conv4_r"
+    bottom: "label_r"
+    top: "loss"
+    loss_weight: 1
+    propagate_down: 1  # backprop to prediction
+    propagate_down: 0# don't backprop to labels
+}
