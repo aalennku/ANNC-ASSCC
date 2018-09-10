@@ -6,7 +6,7 @@
     to your $PATH$ environment and $path_to_ur_caffe/python$ to your $PYTHONPATH$ environment.
 
 2. User should copy the files paviaU.mat and paviaU_gt.mat to ./data/  . 
-3. Please cite the following paper in your publications if this codes help your research: 
+3. Please cite the following paper in your publications if the codes help your research: 
 @article{guo2017spectral,
   title={Spectral-Spatial Feature Extraction and Classification by ANN Supervised with Center Loss in Hyperspectral Imagery},
   author={Guo, Alan JX and Zhu, Fei},
