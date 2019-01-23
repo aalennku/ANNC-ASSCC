@@ -7,9 +7,10 @@
 
 2. User should copy the files paviaU.mat and paviaU_gt.mat to ./data/  . 
 3. Please cite the following paper in your publications if the codes help your research: 
-@article{guo2017spectral,
+@article{guo2018spectral,
   title={Spectral-Spatial Feature Extraction and Classification by ANN Supervised with Center Loss in Hyperspectral Imagery},
   author={Guo, Alan JX and Zhu, Fei},
-  journal={arXiv preprint arXiv:1711.07141},
-  year={2017}
+  journal={IEEE Transactions on Geoscience and Remote Sensing},
+  year={2018},
+  publisher={IEEE}
 }
