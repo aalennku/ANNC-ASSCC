@@ -7,7 +7,6 @@
 
 2. User should copy the files paviaU.mat and paviaU_gt.mat to ./data/  . 
 3. Please cite the following paper in your publications if the codes help your research: 
-
 	'''
 	@article{guo2019spectral,
 		author = {A. J. X. {Guo} and F. {Zhu}},
